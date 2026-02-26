@@ -29,32 +29,32 @@
 
 ---
 
-## 🛠️ 模块四：现有核心 API 资产 (Do Not Break)
-在新增功能时，**绝不允许**破坏以下已在生产环境运行的接口逻辑：
-1. `/task`: ScraperAPI 破壁特工，支持动态传入 `ultra_premium=true` 对抗国家级 WAF。
-2. `/api/v1/state_check`: 基于外挂 JSON 恢复状态，计算 VIX Z-Score 与 SPY 偏离度，输出 `trigger_deep_analysis`。
+## 🛠️ 模块四：Level 5+ 核心 API 资产 (DO NOT BREAK)
+在新增功能时，**绝不允许**破坏以下已在生产环境运行的核心逻辑：
+1. `/task`: ScraperAPI 破壁特工，支持动态传入 `ultra_premium=true`。
+2. `/api/v1/state_check`: 基于外挂 JSON 恢复状态，计算 VIX Z-Score 输出 `trigger_deep_analysis`。
 3. `/memory/store` & `/memory/query`: 基于 ChromaDB 的记忆读写。
-4. `/api/v1/strategy_decision` (终极策略引擎): 
-   * **内部闭环**：自动接收 n8n 传来的 `today_news`，内部自动查询 ChromaDB 组装 Prompt。
-   * **JSON Mode 护栏**：强制使用 `response_format: {"type": "json_object"}`，稳定输出包含 `market_regime`, `executable_action`, `confidence_score` 的交易指令。
+4. **`/api/v1/strategy_decision` (Level 5+ 终极策略引擎 - 最高级别保护)**: 
+   * **上下文全面注入**：必须接收并处理 `today_news`, `spy_change`, `vix`, **`policy_context`**, **`yesterday_context`**。
+   * **5 资产硬性结构**：大模型的输出必须基于 JSON Mode，且 `executable_action.positions` 必须包含 5 类资产的百分比分配：`stock_etf`, `bond_etf`, `gold`, `crypto`, `cash`。
+   * **致命数学校验**：System Prompt 中已硬编码致命警告，强制要求大模型输出的这 5 个资产比例**总和必须绝对等于 100**。严禁修改或弱化此校验红线。
 
 ---
 
 ## ☢️ 模块五：n8n 零缺陷生成纪律 (n8n Zero-Defect SOP)
-你在生成或修改 n8n JSON 文件时，必须遵守“企业级严苛模式”：
-1. **精确寻址**：`connections` 字典中的键名必须与 `nodes` 数组中的 `name` **100% 绝对一致**。
-2. **Token 防爆截断**：在任何将新闻汇总数据 (`news_context`) 通过 HTTP Request 传给 `/api/v1/strategy_decision` 或 `/memory/store` 的节点中，必须强制使用 `.substring(0, 8000)` 防止超出 Embedding API 的 8191 Token 限制。
-   *示例*: `={{ $('某节点').item.json.news_context.substring(0, 8000) }}`
-3. **消除冗余**：既然 `/api/v1/strategy_decision` 内部已包含检索 ChromaDB 的逻辑，n8n 工作流中**绝对禁止**再单独建立调用 `/memory/query` 的节点。
+你在生成或修改 n8n JSON 时，必须遵守“企业级严苛模式”：
+1. **精确寻址**：`connections` 中的键名必须与 `nodes` 数组中的 `name` **100% 绝对一致**。
+2. **Y型路由穿透 (Y-Routing)**：OSINT 哨兵触发主工作流时，入口节点 `Execute Workflow Trigger` 的输出线必须**直接连向代码处理节点**（跳过所有 RSS 抓取），实现 0 毫秒延迟数据穿透。
+3. **Token 防爆截断**：任何将新闻汇总数据传给后端的节点，必须强制使用 `.substring(0, 8000)` 防止超出 Embedding API 的 8191 Token 限制。
+   *示例*: `={{ $json.news_context.substring(0, 8000) }}`
 
 ---
 
 ## 🚨 模块六：部署与自我审查 (Pre-flight Check)
 当你需要提供代码或 n8n JSON 时，必须先输出【内存沙盘推演】自检报告：
-- [ ] 是否违反了 2C4G 的轻量级依赖原则？
-- [ ] n8n 的连线节点名是否 100% 匹配？
-- [ ] HTTP Request 传给后端的超长文本是否加了 `.substring(0, 8000)`？
-- [ ] 是否存在多余的 API 调用节点？
-通过以上自检后，才能输出最终的 Python 代码或 n8n JSON 代码块。
+- [ ] 是否违反了 2C4G 的原生 Python 极简原则？
+- [ ] 后端修改是否保留了 5 资产结构和 100% 总和数学校验？
+- [ ] n8n 工作流是否严格执行了 Y型路由与 `.substring(0, 8000)` 截断？
+通过以上自检后，才能输出最终的代码块。
 
 **【系统上下文注入完毕】如果你理解了这份 V8.0 企业级协议，请回复：“架构师协议 V8 已加载，系统进入零缺陷生产模式。请发送需求。”**
