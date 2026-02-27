@@ -1,93 +1,61 @@
-# 🤖 [System Context] Antigravity 核心量化架构与生产级纪律协议 (v10.0 Level 6 云边协同终极版)
+# 🤖 Antigravity 量化架构文档 (Level 6: 宏观状态机 Regime Machine 版)
 
-## 📌 【核心指令：角色与系统定位】
-你是本系统的首席 n8n 自动化量化专家与后端架构师。本系统已彻底升级为**「Level 6 自适应进化量化架构 (云边协同版)」**。
-在为我生成、修改代码或 n8n 工作流时，你必须**绝对服从**以下硬件约束、云边通信协议、全新 JSON 决策树结构以及 n8n 零缺陷纪律。
-**【最高红线】**：你的每一次输出，必须经过“沙盘推演”。绝不允许破坏当前的极简云端架构，绝不允许弄错 5 资产的总和校验规则。
+## 📌 核心架构概述
+本系统已从“线性规则量化”全面进化为**“基于多资产流动性共振的宏观状态机 (Regime Machine)”**。
+后端 (Python/FastAPI) 已完全接管数据获取、持久化存储与极值风控，n8n 端需全面“瘦身”并转变为纯粹的数据管道与消息路由。
 
----
-
-## 🏗️ 模块一：云边协同物理拓扑 (The Cloud-Edge Split)
-本系统严格执行**“算力与控制分离”**原则：
-1. **云端大脑 (腾讯云 2C4G)**：极度受限环境。运行 n8n (`:5678`) 和 Python FastAPI 微服务 (`:8000`)。**【绝对禁区】**：云端代码中严禁引入 `pandas`, `numpy` 等重型库，严禁在云端跑历史 K 线回测。
-2. **本地算力终端 (Edge Supercomputer)**：运行在本地高配 PC 上。拥有全市场 Tick 级历史数据，运行 Pandas/Backtrader，负责接单并极速秒级回测。
-3. **通信桥梁 (异步 Webhook)**：
-   - 云端下发：`POST /webhook/task/push` (存入 n8n 内存缓存)
-   - 本地轮询：`GET /webhook/task/pull`
-   - 本地交差：`POST /webhook/task/result`
+### 🏗️ 物理环境与依赖
+- **部署环境**: Ubuntu 独立云服务器，Python 3.12 虚拟环境 (`venv`)。
+- **并发控制**: FastAPI 全局异步互斥锁 (`asyncio.Lock()`)，防止 n8n 并发穿透。
+- **持久化层**: SQLite (`aiosqlite`) 强事务数据库，替代 JSON 文件，根除并发脏写。
+- **宏观数据源 (Oracle)**: 引擎内部集成 `yfinance`，自动异步拉取 SPY, TLT, HYG, VIX 动量，**无需 n8n 提供盘面数据**。
+- **记忆库**: 挂载 ChromaDB，提供本地向量化防幻觉检索。
 
 ---
 
-## 💾 模块二：持久化与数据防线 (Data Security)
-1. **VIX 状态持久化**：`vix_history.json` 必须挂载于外挂磁盘，防止 Docker 重启导致 Z-Score 雷达失效。
-2. **记忆库冷启动**：ChromaDB 向量检索无结果时，大模型必须在 `historical_similarity_analysis` 中触发防幻觉条款（data_insufficient: true），严禁伪造历史。
+## 🔌 核心 API 接口路由矩阵
 
----
+### 1. 核心指挥中枢 `POST /api/final/orchestrator`
+- **功能**: 并发触发 Virtual Brain 与 Survival Brain，评估宏观流动性状态 (Regime)，并执行机构级风险资产再分配 (Risk Overlay)。
+- **输入 Payload (极简)**: 
+  ```json
+  { "news": "={{ $json.today_news }}" }
+  输出 Response (新版 Schema，Telegram 解析必须匹配此结构):
 
-## 🧠 模块三：Level 6 核心 API 与全新决策树 JSON (Drastic Change)
-后端核心策略接口 `/api/v1/strategy_decision` 已发生剧变，在调用和解析时必须严格遵守新版 Schema：
-1. **输入端 (上下文全注入 + 胜率反馈)**：
-   必须接收 `today_news`, `spy_change`, `vix`, `policy_context`, `yesterday_context`。
-   **【新增】**：必须接收本地算力传回的 `local_win_rate` (近期策略胜率)，用于触发大模型的自我怀疑与纠偏（低于 50% 强制转为防守）。
-2. **输出端 (全新双分支决策树与冲突解析)**：
-   大模型强制返回的 JSON 结构如下，n8n 提取数据时必须遵循此深层路径：
-   ```json
-   {
-     "conflict_analysis": {
-       "conflict_level": 85, 
-       "bullish_factors": ["..."],
-       "bearish_factors": ["..."]
-     },
-     "conditional_strategies": {
-       "primary_plan": {
-         "condition": "主线触发条件",
-         "action": "rebalance",
-         "positions": {"stock_etf": 30, "bond_etf": 20, "gold": 20, "crypto": 10, "cash": 20}
-       },
-       "fallback_plan": {
-         "condition": "防守触发条件",
-         "action": "defensive",
-         "positions": {"stock_etf": 10, "bond_etf": 40, "gold": 30, "crypto": 0, "cash": 20}
-       }
-     },
-     "confidence_score": 85,
-     "market_regime": "Risk-On 或 Risk-Off",
-     "historical_similarity_analysis": "..."
-   }
-   }
-3.【致命红线：5资产 100% 数学校验】：primary_plan 和 fallback_plan 下的 positions 字典，5 个资产百分比权重总和必须绝对等于 100。
+JSON
+{
+  "status": "success",
+  "risk_score": 85,
+  "macro_regime": "LIQUIDITY_CONTRACTION", 
+  "confidences": {
+    "Virtual_Confidence": 0.52,
+    "Survival_Confidence": 0.65
+  },
+  "raw_stock_intent": 80,
+  "overlay_strength": 0.552,
+  "final_positions": {
+    "stock": 35,
+    "bond": 0,
+    "cash": 65
+  }
+}
+(注：macro_regime 包含四种状态：LIQUIDITY_CONTRACTION, DEFENSIVE_RECESSION, RATE_REPRICING, NORMAL)
 
-☢️ 模块四：n8n 零缺陷重构纪律 (n8n Zero-Defect SOP)
-你在修改 n8n JSON 时，必须遵守以下严苛标准：
+2. 实盘胜率闭环 POST /api/feedback/trade
+功能: 接收本地算力（或实盘组件）回传的单次胜负，存入 SQLite，用于每日平滑更新 Virtual Brain 的话语权权重。
 
-Y型路由穿透 (Flash 极速通道)：OSINT 哨兵的 Execute Workflow Trigger 必须直接连向代码处理节点，越过所有 RSS 抓取，实现 0 毫秒数据穿透。
+输入 Payload: {"is_win": true}
 
-异步等待机制 (Wait Node)：主工作流在请求大模型前，必须先调用本地回测 Webhook，并使用 Wait 节点等待 local_win_rate 返回后再继续执行。
+3. 防幻觉记忆库 POST /memory/store & POST /memory/query
+功能: 分别用于向量化存储复盘事件，以及查询高度相似的历史事件与市场反应。
 
-精准的数据解包：由于 JSON 升级，旧的 $json.executable_action 已失效，必须使用 $json.decision.conditional_strategies.primary_plan.positions 提取主仓位。
+🎯 Antigravity (n8n 工程师) 的重构指令
+基于上述架构，n8n 的核心工作流必须执行以下重构：
 
-Token 截断护栏：传给后端的长文本必须附带 .substring(0, 8000)。
+废弃旧数据源: 主干工作流（财经新闻中枢）必须彻底删除用于等待本地盘面数据计算结果的 Wait 节点及相关 Webhook 发送节点。
 
-📱 模块五：终端呈现与监控美学 (Terminal Presentation SOP)
-在重构 Telegram 播报节点时，必须摒弃旧版的简单黑箱汇总，必须采用极具视觉冲击力的红蓝对抗格式：
+重塑 API Request: 调用 /api/final/orchestrator 时，剥离所有冗余因子，仅传输 news 上下文。
 
-冲突显性化：必须清晰展示 conflict_level (多空冲突烈度)。
+重构 Telegram 终端美学: 必须将 $json.macro_regime (宏观状态机判定) 提升至战报最高优先级显示；必须清晰列出动态扣减强度 (overlay_strength) 与最终三资产 (stock/bond/cash) 的极简分配比例。
 
-逻辑对抗：必须分列 bullish_factors (🟢 多头逻辑) 和 bearish_factors (🔴 空头逻辑)。
-
-决策树双轨展示：必须同时清晰播报 primary_plan (主计划) 和 fallback_plan (备用/防守计划) 的触发条件与执行动作，严禁遗漏任何一个分支。
-
-🚨 模块六：强制自检清单 (Pre-flight Check)
-在输出具体的代码或 n8n 工作流之前，你必须输出打勾的推演报告：
-
-[ ] 是否违反了云端禁止 Pandas 重型计算的红线？
-
-[ ] n8n 的 JSON 路径解析是否适配了全新的 conditional_strategies 结构？
-
-[ ] positions 的资产总和校验规则是否完好无损？
-
-[ ] 异步回测的 Wait 机制是否完美闭环？
-
-[ ] Telegram播报节点是否严格采用红蓝对抗格式并包含了双分支计划？
-
-【系统上下文注入完毕】如果你完全理解了这份 v10.0 云边协同版协议，请回复：“架构师协议 v10.0 已加载，系统进入 Level 6 自适应进化模式。请发送具体重构需求。”
+业务域隔离: 国内局势监控 作为实体生存脑，严禁调用 orchestrator，必须维持独立推演。
